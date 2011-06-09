@@ -63,14 +63,13 @@
         {
             height: "auto",
             url: definition.url,
-            datatype: 'json',
+            datatype: 'local', //data for the grid will be not be loaded if the grid is disabled after initialization
             mtype: 'POST',
             altRows: true,
             autowidth: true,
             gridview: true,
             colNames: definition.headers,
             colModel: definition.colModel,
-            /*onCellSelect: onCellSelect,*/
             rowNum: model.initialRows || 10,
             rowList: [3, 10, 20, 30],
             loadui: "disable",
@@ -86,6 +85,7 @@
             postData: { criterion: definition.initialCriteria },
             pager: $(pagerSelector),
             onPaging: function (pgButton) {
+                $div.trigger("grid-paging", pgButton);
                 if (pgButton == 'records') {
                     this.page = 1;
                 }
@@ -94,19 +94,34 @@
                 $div.trigger("grid-refreshed", data);
                 div.selectedRow = null;
             },
-            ondblClickRow: function (rowId, iCol, cellcontent, e) {
+            onCellSelect: function(rowId, iCol, cellcontent, e){
                 var row = div.getData(rowId);
-                $div.trigger("row-doubleclicked", row);
+                $div.trigger("cell-selected", [row, rowId, iCol, cellcontent, e]);
+            },
+            ondblClickRow: function (rowId, iRow, iCol, e) {
+                var row = div.getData(rowId);
+                $div.trigger("row-doubleclicked", row, iRow, iCol, e);
+            },
+            onSortCol: function(name, colIndex, order){
+                $div.trigger("col-sorted", [name, colIndex, order]);
+            },
+            onRightClickRow: function(rowId, iRow, iCol, e){
+                var row = div.getData(rowId);
+                $div.trigger("row-rightclicked", [row, iRow, iCol, e]);
             },
             onSelectRow: function (rowid, status) {
                 div.selectedRow = div.getData(rowid);
                 $div.trigger("row-selected", div.selectedRow);
+            },
+            resizeStart: function(evt, colIdx){
+                $div.trigger("col-resizing", [colIdx, evt]);
             },
             resizeStop: function(newWidth, colIdx){
 				$div.trigger("col-resized", [newWidth, colIdx]);
             },
             loadComplete: function (data) {
                 div.data = data.items;
+                $div.trigger("grid-dataloaded", data);
                 return true;
             }
         };
@@ -116,6 +131,7 @@
 
         div.refresh = function () {
             if (!div.isGridDisabled) {
+				div.grid.setGridParam({ datatype: 'json' });
                 div.grid.trigger("reloadGrid");
             }
         }
