@@ -1,15 +1,108 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
+using Bottles;
 using FubuCore.Util;
 using FubuCore.Reflection;
 using System.Linq;
 using FubuCore;
+using FubuMVC.Core;
+using FubuMVC.Core.Registration;
+using FubuMVC.Core.Registration.Nodes;
 
 namespace FubuMVC.ActivityStream
 {
+
+    public static class ActivityStreamFubuRegistryExtension
+    {
+        public static void RegisterActivityStreamHandlers(this FubuRegistry registry)
+        {
+            registry.ApplyConvention(new ActivityStreamConvention(registry.Types));
+        }
+    }
+
+    public class ActivityStreamConvention : IConfigurationAction
+    {
+        private readonly TypePool _original;
+
+        public ActivityStreamConvention(TypePool original)
+        {
+            _original = original;
+        }
+
+        public void Configure(BehaviorGraph graph)
+        {
+            TypePool pool = buildTypePool();
+
+            findAllActivityTypes(pool);
+            findAllActivityStreams(pool, graph);
+            findAllVisualizers(pool, graph);
+        }
+
+        private static void findAllVisualizers(TypePool pool, BehaviorGraph graph)
+        {
+            pool.TypesMatching(t => t.IsConcrete() && t.Name.EndsWith("Visualizer"))
+                .Each(type =>
+                {
+                    type.GetMethods().Where(IsVisualizerMethod).Each(method =>
+                    {
+                        addVisualizersForMethod(type, method, graph);
+                    });
+                });
+
+        }
+
+        private static void addVisualizersForMethod(Type type, MethodInfo method, BehaviorGraph graph)
+        {
+            var chain = new BehaviorChain();
+            var call = new ActionCall(type, method);
+            chain.AddToEnd(call);
+            graph.AddChain(chain);
+        }
+
+        public static bool IsVisualizerMethod(MethodInfo method)
+        {
+            if (method.GetParameters().Length != 1) return false;
+            if (method.ReturnType == typeof(void)) return false;
+
+            return method.GetParameters().Single().ParameterType.CanBeCastTo<Activity>();
+        }
+
+        private TypePool buildTypePool()
+        {
+            var pool = new TypePool(null)
+                       {
+                           ShouldScanAssemblies = true
+                       };
+            pool.AddAssemblies(_original.Assemblies);
+            pool.AddAssemblies(PackageRegistry.PackageAssemblies);
+            return pool;
+        }
+
+        private static void findAllActivityStreams(TypePool pool, BehaviorGraph registry)
+        {
+            pool.TypesMatching(t => t.Closes(typeof(IActivityStream<>))).Each(t =>
+            {
+                var @interface = t.FindInterfaceThatCloses(typeof(IActivityStream<>));
+                registry.Services.SetServiceIfNone(@interface, t);
+            });
+        }
+
+        private static void findAllActivityTypes(TypePool pool)
+        {
+            pool.TypesMatching(t => t.IsConcreteTypeOf<Activity>()).Each(ActivityTypes.Register);
+        }
+    }
+
+    public interface IActivityStream<T>
+    {
+        IEnumerable<IActivityItem> Fetch(T subject);
+    }
+    
+
     /// <summary>
     /// Just a marker interface
     /// </summary>

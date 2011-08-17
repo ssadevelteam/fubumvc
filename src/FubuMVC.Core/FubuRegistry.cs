@@ -53,6 +53,14 @@ namespace FubuMVC.Core
             setupDefaultConventionsAndPolicies();
         }
 
+        /// <summary>
+        /// TypePool gives you access to the assemblies and types available for scanning
+        /// </summary>
+        public TypePool Types
+        {
+            get { return _types; }
+        }
+
 
         public FubuRegistry(Action<FubuRegistry> configure) : this()
         {

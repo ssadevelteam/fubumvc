@@ -1,48 +1,10 @@
-using FubuCore;
+using FubuCore.Reflection;
+using HtmlTags;
 using NUnit.Framework;
 using FubuTestingSupport;
 
 namespace FubuMVC.ActivityStream.Testing
 {
-    [TestFixture]
-    public class ActivityTypesTester
-    {
-        [Test]
-        public void get_activity_name_for_a_type_with_no_attribute()
-        {
-            ActivityTypes.GetActivityName(typeof (FirstActivity)).ShouldEqual("FirstActivity");
-        }
-
-        [Test]
-        public void get_activity_name_for_a_type_with_an_attribute()
-        {
-            ActivityTypes.GetActivityName(typeof (ThirdActivity)).ShouldEqual("Third");
-        }
-
-        [Test]
-        public void register_and_fetch_activity_type()
-        {
-            ActivityTypes.Register(typeof(FirstActivity));
-            ActivityTypes.TypeForActivityName("FirstActivity").ShouldEqual(typeof (FirstActivity));
-        }
-
-        [Test]
-        public void dehydrate_and_hydrate_an_activity_item()
-        {
-            var item = new ActivityItem();
-            var activity1 = new FirstActivity(){
-                Name = "Max",
-                Age = 7
-            };
-
-            ActivityTypes.Dehydrate(item, activity1);
-
-            var activity2 = ActivityTypes.Hydrate(item).As<FirstActivity>();
-
-            activity1.ShouldEqual(activity2);
-        }
-    }
-
     public class FirstActivity : Activity
     {
         public string Name { get; set; }
@@ -76,5 +38,60 @@ namespace FubuMVC.ActivityStream.Testing
     [ActivityTypeName("Third")]
     public class ThirdActivity : Activity{}
 
+    public class NotAnActivity{}
     
+    [TestFixture]
+    public class ActivityStreamConventionTester
+    {
+        [Test]
+        public void is_visualizer_method_positive_case()
+        {
+            ActivityStreamConvention.IsVisualizerMethod(ReflectionHelper.GetMethod<FirstActivityVisualizer>(x => x.Visualize(null)))
+                .ShouldBeTrue();
+        }
+
+        [Test]
+        public void is_visualizer_method_negative_with_too_many_inputs()
+        {
+            ActivityStreamConvention.IsVisualizerMethod(ReflectionHelper.GetMethod<FirstActivityVisualizer>(x => x.WrongWithTooManyParameters(null, 0)))
+                .ShouldBeFalse();
+        }
+
+        [Test]
+        public void is_visualizer_method_negative_with_not_an_activity_input()
+        {
+            ActivityStreamConvention.IsVisualizerMethod(ReflectionHelper.GetMethod<FirstActivityVisualizer>(x => x.WrongBecauseTheInputIsNotAnActivity(null)))
+                .ShouldBeFalse();
+        }
+
+        [Test]
+        public void is_visualizer_method_negative_when_there_is_no_output()
+        {
+            ActivityStreamConvention.IsVisualizerMethod(ReflectionHelper.GetMethod<FirstActivityVisualizer>(x => x.WrongBecauseThereIsNotOutput(null)))
+                .ShouldBeFalse();  
+        }
+    }
+    
+    public class FirstActivityVisualizer
+    {
+        public HtmlTag Visualize(FirstActivity activity)
+        {
+            return new HtmlTag("div");
+        }
+
+        public object WrongWithTooManyParameters(FirstActivity activity, int count)
+        {
+            return null;
+        }
+
+        public object WrongBecauseTheInputIsNotAnActivity(NotAnActivity not)
+        {
+            return null;
+        }
+
+        public void WrongBecauseThereIsNotOutput(FirstActivity activity)
+        {
+            
+        }
+    }
 }
