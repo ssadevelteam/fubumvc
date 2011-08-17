@@ -38,7 +38,7 @@ namespace FubuMVC.ActivityStream
             return name;
         }
 
-        public static void Dehydrate<T>(ActivityItem item, T activity) where T : Activity
+        public static void Dehydrate<T>(IActivityItem item, T activity) where T : Activity
         {
             if (!_types.GetAll().Contains(typeof(T)))
             {
