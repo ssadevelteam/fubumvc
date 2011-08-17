@@ -60,6 +60,7 @@
     <Compile Include="Activity.cs" />
     <Compile Include="ActivityItem.cs" />
     <Compile Include="ActivityStreamConvention.cs" />
+    <Compile Include="ActivityStreamPageExtensions.cs" />
     <Compile Include="ActivityTypeNameAttribute.cs" />
     <Compile Include="ActivityTypes.cs" />
     <Compile Include="ActivityVisualizerActionSource.cs" />

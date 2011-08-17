@@ -51,10 +51,10 @@ namespace FubuMVC.ActivityStream
         }
 
 
-        public static object Hydrate(IActivityItem item)
+        public static Activity Hydrate(IActivityItem item)
         {
             var type = TypeForActivityName(item.Type);
-            return JsonUtil.Get(type, item.Json);
+            return (Activity) JsonUtil.Get(type, item.Json);
         }
 
         public static IEnumerable<Type> AllActivityTypes
