@@ -1,7 +1,6 @@
-using FubuCore.Reflection;
+using System;
+using System.Collections.Generic;
 using HtmlTags;
-using NUnit.Framework;
-using FubuTestingSupport;
 
 namespace FubuMVC.ActivityStream.Testing
 {
@@ -39,39 +38,7 @@ namespace FubuMVC.ActivityStream.Testing
     public class ThirdActivity : Activity{}
 
     public class NotAnActivity{}
-    
-    [TestFixture]
-    public class ActivityStreamConventionTester
-    {
-        [Test]
-        public void is_visualizer_method_positive_case()
-        {
-            ActivityStreamConvention.IsVisualizerMethod(ReflectionHelper.GetMethod<FirstActivityVisualizer>(x => x.Visualize(null)))
-                .ShouldBeTrue();
-        }
 
-        [Test]
-        public void is_visualizer_method_negative_with_too_many_inputs()
-        {
-            ActivityStreamConvention.IsVisualizerMethod(ReflectionHelper.GetMethod<FirstActivityVisualizer>(x => x.WrongWithTooManyParameters(null, 0)))
-                .ShouldBeFalse();
-        }
-
-        [Test]
-        public void is_visualizer_method_negative_with_not_an_activity_input()
-        {
-            ActivityStreamConvention.IsVisualizerMethod(ReflectionHelper.GetMethod<FirstActivityVisualizer>(x => x.WrongBecauseTheInputIsNotAnActivity(null)))
-                .ShouldBeFalse();
-        }
-
-        [Test]
-        public void is_visualizer_method_negative_when_there_is_no_output()
-        {
-            ActivityStreamConvention.IsVisualizerMethod(ReflectionHelper.GetMethod<FirstActivityVisualizer>(x => x.WrongBecauseThereIsNotOutput(null)))
-                .ShouldBeFalse();  
-        }
-    }
-    
     public class FirstActivityVisualizer
     {
         public HtmlTag Visualize(FirstActivity activity)
@@ -92,6 +59,49 @@ namespace FubuMVC.ActivityStream.Testing
         public void WrongBecauseThereIsNotOutput(FirstActivity activity)
         {
             
+        }
+    }
+
+    public class SecondVisualizer
+    {
+        public HtmlDocument Show(SecondActivity activity)
+        {
+            return new HtmlDocument();
+        }
+
+        public HtmlTag Visualize(ThirdActivity activity)
+        {
+            return new HtmlTag("div");
+        }
+    }
+
+    public class Contact{}
+
+    public class Case{}
+
+    public class Site{}
+
+    public class ContactStream : IActivityStream<Contact>
+    {
+        public IEnumerable<IActivityItem> Fetch(Contact subject)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class CaseStream : IActivityStream<Case>
+    {
+        public IEnumerable<IActivityItem> Fetch(Case subject)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class SiteStream : IActivityStream<Site>
+    {
+        public IEnumerable<IActivityItem> Fetch(Site subject)
+        {
+            throw new NotImplementedException();
         }
     }
 }

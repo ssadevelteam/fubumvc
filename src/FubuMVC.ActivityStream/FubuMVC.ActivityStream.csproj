@@ -57,7 +57,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes.cs" />
+    <Compile Include="Activity.cs" />
+    <Compile Include="ActivityItem.cs" />
+    <Compile Include="ActivityStreamConvention.cs" />
+    <Compile Include="ActivityTypeNameAttribute.cs" />
+    <Compile Include="ActivityTypes.cs" />
+    <Compile Include="ActivityVisualizerActionSource.cs" />
+    <Compile Include="ActivityStreamFubuRegistryExtension.cs" />
+    <Compile Include="IActivityItem.cs" />
+    <Compile Include="IActivityStream.cs" />
+    <Compile Include="javascript.cs" />
+    <Compile Include="JsonUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

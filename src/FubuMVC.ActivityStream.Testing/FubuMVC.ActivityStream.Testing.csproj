@@ -71,9 +71,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActivityVisualizerActionSourceTester.cs" />
     <Compile Include="ActivityTypesTester.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tester1.cs" />
+    <Compile Include="when_executing_the_activity_stream_convention.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FubuMVC.ActivityStream\FubuMVC.ActivityStream.csproj">
