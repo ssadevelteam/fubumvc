@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using FubuCore;
 using FubuMVC.Core.Registration;
-using TypeExtensions = FubuCore.TypeExtensions;
 
 namespace FubuMVC.ActivityStream
 {
@@ -24,9 +23,9 @@ namespace FubuMVC.ActivityStream
 
         private static void findAllActivityStreams(TypePool pool, BehaviorGraph registry)
         {
-            pool.TypesMatching(t => t.Closes(typeof(IActivityStream<>))).Each(t =>
+            pool.TypesMatching(t => t.IsConcrete() && t.Closes(typeof(IActivityStream<>))).Each(t =>
             {
-                var @interface = TypeExtensions.FindInterfaceThatCloses(t, typeof(IActivityStream<>));
+                var @interface = t.FindInterfaceThatCloses(typeof(IActivityStream<>));
                 registry.Services.SetServiceIfNone(@interface, t);
             });
         }
