@@ -10,6 +10,28 @@ namespace FubuMVC.Core.Http.AspNet
     {
         public AspNetServiceArguments(RequestContext requestContext)
         {
+            requestContext.HttpContext.Request.TimedOutToken.Register(() => {
+                try
+                {
+                    requestContext.HttpContext.Request.Abort();
+                }
+                catch (Exception)
+                {
+                    
+                }
+            });
+
+            requestContext.HttpContext.Response.ClientDisconnectedToken.Register(() => {
+                try
+                {
+                    requestContext.HttpContext.Request.Abort();
+                }
+                catch (Exception)
+                {
+
+                }
+            });
+
             var currentRequest = new AspNetCurrentHttpRequest(requestContext.HttpContext.Request);
 
             With<IRequestData>(new AspNetRequestData(requestContext, currentRequest));
